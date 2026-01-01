@@ -7,13 +7,13 @@ from pyrogram.types import (
 from config import API_ID, API_HASH, BOT_TOKEN
 from fonts import get_all_styles, apply_style, FONTS
 
-# Configure logging
+# ====================== CONFIG ======================
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize the Client
+# Initialize the bot client
 app = Client(
-    "font_bot_new",
+    "font_bot",
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN
@@ -29,28 +29,27 @@ async def start_command(client: Client, message: Message):
     Menangani perintah /start.
     """
     welcome_text = (
-        "👋 **Selamat datang di Font Changer Bot!**\n\n"
+        "👋 <b>Selamat datang di Font Changer Bot!</b>\n\n"
         "Aku bisa mengubah teks kamu menjadi berbagai gaya font menarik.\n\n"
-        "**Cara pakai:**\n"
+        "<b>Cara pakai:</b>\n"
         "1. Kirim teks apa saja di chat ini.\n"
         "2. Aku akan membalas dengan beberapa versi bergaya.\n"
         "3. Klik tombol untuk menyalin gaya (jika tersedia) atau cukup salin teksnya.\n\n"
-        "**Mode Inline:**\n"
-        "Ketik `@NamaBotKamu teks` di chat mana saja untuk melihat hasil langsung.\n\n"
+        "<b>Mode Inline:</b>\n"
+        "Ketik <code>@NamaBotKamu teks</code> di chat mana saja untuk melihat hasil langsung.\n\n"
         "Ketik /fonts untuk melihat gaya font yang tersedia.\n\n"
-        "👨‍💻 **Developer:** [dotzbaik80](https://te.me/dotzbaik80)"
+        "👨‍💻 <b>Developer:</b> <a href='https://te.me/dotzbaik80'>dotzbaik80</a>"
     )
-    
-    # Tombol untuk developer
+
     buttons = InlineKeyboardMarkup([
         [InlineKeyboardButton("👨‍💻 Developer", url="https://te.me/dotzbaik80")]
     ])
-    
+
     await message.reply_text(
         welcome_text,
         reply_markup=buttons,
         disable_web_page_preview=True,
-        parse_mode="markdown"
+        parse_mode="html"
     )
 
 # ====================== FONTS COMMAND ======================
@@ -60,13 +59,13 @@ async def fonts_command(client: Client, message: Message):
     Menangani perintah /fonts untuk menampilkan semua gaya font.
     """
     sample_text = "Font Style"
-    text = "**Daftar Font Tersedia:**\n\n"
+    text = "<b>Daftar Font Tersedia:</b>\n\n"
     
     for style_name in FONTS.keys():
         styled_sample = apply_style(sample_text, style_name)
         text += f"• {style_name}: {styled_sample}\n"
         
-    await message.reply_text(text, parse_mode="markdown")
+    await message.reply_text(text, parse_mode="html")
 
 # ====================== HANDLE PRIVATE TEXT ======================
 @app.on_message(filters.text & filters.private)
@@ -85,22 +84,20 @@ async def handle_text(client: Client, message: Message):
     row = []
     
     for style_name, styled_text in styles.items():
-        btn_text = style_name
-        row.append(InlineKeyboardButton(btn_text, callback_data=f"style|{style_name}"))
-        
-        if len(row) == 3:  # 3 tombol per baris
+        row.append(InlineKeyboardButton(style_name, callback_data=f"style|{style_name}"))
+        if len(row) == 3:
             buttons.append(row)
             row = []
-    
+
     if row:
         buttons.append(row)
-    
+
     sent_msg = await message.reply_text(
-        "**Berikut hasil font kamu:**\n(Klik gaya untuk mengirimnya sebagai pesan terpisah agar mudah disalin)",
+        "<b>Berikut hasil font kamu:</b>\n(Klik gaya untuk mengirimnya sebagai pesan terpisah agar mudah disalin)",
         reply_markup=InlineKeyboardMarkup(buttons),
-        parse_mode="markdown"
+        parse_mode="html"
     )
-    
+
     # Simpan teks asli di cache
     TEXT_CACHE[sent_msg.id] = text
 
@@ -113,16 +110,16 @@ async def handle_style_callback(client: Client, callback_query):
     try:
         data = callback_query.data.split("|")
         style_name = data[1]
-        
+
         message_id = callback_query.message.id
         original_text = TEXT_CACHE.get(message_id)
-        
+
         if not original_text:
-            # Fallback jika teks tidak ada di cache
+            # fallback jika teks tidak ada di cache
             original_message = callback_query.message.reply_to_message
             if original_message and original_message.text:
                 original_text = original_message.text
-        
+
         if not original_text:
             await callback_query.answer(
                 "Teks asli tidak ditemukan (mungkin sudah lama atau cache dibersihkan).",
@@ -131,10 +128,7 @@ async def handle_style_callback(client: Client, callback_query):
             return
 
         styled_text = apply_style(original_text, style_name)
-        
-        await callback_query.message.reply_text(
-            f"`{styled_text}`", parse_mode=None
-        )
+        await callback_query.message.reply_text(f"`{styled_text}`", parse_mode=None)
         await callback_query.answer(f"Gaya {style_name} dikirim!")
 
     except Exception as e:
@@ -148,7 +142,7 @@ async def inline_query_handler(client: Client, query: InlineQuery):
     Menangani inline query.
     """
     text = query.query.strip()
-    
+
     if not text:
         await query.answer(
             results=[],
@@ -159,7 +153,7 @@ async def inline_query_handler(client: Client, query: InlineQuery):
 
     results = []
     styles = get_all_styles(text)
-    
+
     for i, (style_name, styled_text) in enumerate(styles.items()):
         results.append(
             InlineQueryResultArticle(
@@ -169,7 +163,7 @@ async def inline_query_handler(client: Client, query: InlineQuery):
                 input_message_content=InputTextMessageContent(styled_text)
             )
         )
-        
+
     await query.answer(results)
 
 # ====================== RUN BOT ======================
