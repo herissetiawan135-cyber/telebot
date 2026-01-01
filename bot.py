@@ -26,19 +26,19 @@ TEXT_CACHE = {}
 @app.on_message(filters.command("start"))
 async def start_command(client: Client, message: Message):
     """
-    Menangani perintah /start.
+    Menangani perintah /start
     """
     welcome_text = (
-        "👋 <b>Selamat datang di Font Changer Bot!</b>\n\n"
+        "👋 Selamat datang di Font Changer Bot!\n\n"
         "Aku bisa mengubah teks kamu menjadi berbagai gaya font menarik.\n\n"
-        "<b>Cara pakai:</b>\n"
+        "Cara pakai:\n"
         "1. Kirim teks apa saja di chat ini.\n"
         "2. Aku akan membalas dengan beberapa versi bergaya.\n"
         "3. Klik tombol untuk menyalin gaya (jika tersedia) atau cukup salin teksnya.\n\n"
-        "<b>Mode Inline:</b>\n"
-        "Ketik <code>@NamaBotKamu teks</code> di chat mana saja untuk melihat hasil langsung.\n\n"
+        "Mode Inline:\n"
+        "Ketik @NamaBotKamu teks di chat mana saja untuk melihat hasil langsung.\n\n"
         "Ketik /fonts untuk melihat gaya font yang tersedia.\n\n"
-        "👨‍💻 <b>Developer:</b> <a href='https://te.me/dotzbaik80'>dotzbaik80</a>"
+        "👨‍💻 Developer: dotzbaik80"
     )
 
     buttons = InlineKeyboardMarkup([
@@ -48,30 +48,29 @@ async def start_command(client: Client, message: Message):
     await message.reply_text(
         welcome_text,
         reply_markup=buttons,
-        disable_web_page_preview=True,
-        parse_mode="html"
+        disable_web_page_preview=True
     )
 
 # ====================== FONTS COMMAND ======================
 @app.on_message(filters.command("fonts"))
 async def fonts_command(client: Client, message: Message):
     """
-    Menangani perintah /fonts untuk menampilkan semua gaya font.
+    Menangani perintah /fonts untuk menampilkan semua gaya font
     """
     sample_text = "Font Style"
-    text = "<b>Daftar Font Tersedia:</b>\n\n"
+    text = "Daftar Font Tersedia:\n\n"
     
     for style_name in FONTS.keys():
         styled_sample = apply_style(sample_text, style_name)
         text += f"• {style_name}: {styled_sample}\n"
         
-    await message.reply_text(text, parse_mode="html")
+    await message.reply_text(text)
 
 # ====================== HANDLE PRIVATE TEXT ======================
 @app.on_message(filters.text & filters.private)
 async def handle_text(client: Client, message: Message):
     """
-    Menangani teks normal di chat pribadi.
+    Menangani teks normal di chat pribadi
     """
     text = message.text
     if not text:
@@ -83,7 +82,7 @@ async def handle_text(client: Client, message: Message):
     buttons = []
     row = []
     
-    for style_name, styled_text in styles.items():
+    for style_name in styles.keys():
         row.append(InlineKeyboardButton(style_name, callback_data=f"style|{style_name}"))
         if len(row) == 3:
             buttons.append(row)
@@ -93,9 +92,8 @@ async def handle_text(client: Client, message: Message):
         buttons.append(row)
 
     sent_msg = await message.reply_text(
-        "<b>Berikut hasil font kamu:</b>\n(Klik gaya untuk mengirimnya sebagai pesan terpisah agar mudah disalin)",
-        reply_markup=InlineKeyboardMarkup(buttons),
-        parse_mode="html"
+        "Berikut hasil font kamu:\n(Klik gaya untuk mengirimnya sebagai pesan terpisah agar mudah disalin)",
+        reply_markup=InlineKeyboardMarkup(buttons)
     )
 
     # Simpan teks asli di cache
@@ -105,7 +103,7 @@ async def handle_text(client: Client, message: Message):
 @app.on_callback_query(filters.regex(r"^style\|"))
 async def handle_style_callback(client: Client, callback_query):
     """
-    Menangani klik tombol gaya font.
+    Menangani klik tombol gaya font
     """
     try:
         data = callback_query.data.split("|")
@@ -128,7 +126,7 @@ async def handle_style_callback(client: Client, callback_query):
             return
 
         styled_text = apply_style(original_text, style_name)
-        await callback_query.message.reply_text(f"`{styled_text}`", parse_mode=None)
+        await callback_query.message.reply_text(f"`{styled_text}`")
         await callback_query.answer(f"Gaya {style_name} dikirim!")
 
     except Exception as e:
@@ -139,7 +137,7 @@ async def handle_style_callback(client: Client, callback_query):
 @app.on_inline_query()
 async def inline_query_handler(client: Client, query: InlineQuery):
     """
-    Menangani inline query.
+    Menangani inline query
     """
     text = query.query.strip()
 
