@@ -36,13 +36,13 @@ async def start_command(client: Client, message: Message):
         "2. Aku akan membalas dengan beberapa versi bergaya.\n"
         "3. Klik tombol untuk menyalin gaya (jika tersedia) atau cukup salin teksnya.\n\n"
         "Mode Inline:\n"
-        "Ketik @NamaBotKamu teks di chat mana saja untuk melihat hasil langsung.\n\n"
+        "Ketik nama lu teks di chat mana saja untuk melihat hasil langsung.\n\n"
         "Ketik /fonts untuk melihat gaya font yang tersedia.\n\n"
-        "👨‍💻 Developer: dotzbaik80"
+        "👨‍💻 Developer: dotzbaik"
     )
 
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("👨‍💻 Developer", url="https://te.me/dotzbaik80")]
+        [InlineKeyboardButton("👨‍💻 Developer", url="https://te.me/dotzbaik")]
     ])
 
     await message.reply_text(
